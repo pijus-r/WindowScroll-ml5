@@ -5,3 +5,17 @@
   margin: auto;
   padding: 10px;
 }
+
+.wrapper {
+  height: 10000px;
+  width: 100vw;
+
+  .hand-position {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 6em;
+    left: 50%;
+    font-family: sans-serif;
+  }
+}

@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {HandPosition} from './hand.enum';
 
 declare let ml5: any;
 
@@ -22,9 +23,15 @@ export interface Palm {
 })
 export class TrackingComponent implements OnInit {
 
+
+  constructor() {
+  }
+
   public handpose;
+  public handPosition: HandPosition;
   public video;
   public predictions: Array<HandposePrediction> = [];
+  public tracking = false;
 
   public options = {
     flipHorizontal: false, // boolean value for if the video should be flipped, defaults to false
@@ -36,8 +43,11 @@ export class TrackingComponent implements OnInit {
 
   private _WINDOW_CENTER = 240;
 
-
-  constructor() {
+  private static _scrollTo(amount: number): void {
+    window.scrollBy({
+      top: amount,
+      behavior: 'smooth',
+    });
   }
 
   ngOnInit(): void {
@@ -69,20 +79,22 @@ export class TrackingComponent implements OnInit {
     });
   }
 
-  private _scrollTo(amount: number): void {
-    window.scrollBy({
-      top: amount,
-      behavior: 'smooth',
-    });
-  }
-
   private _initTracking(): void {
     this.handpose.on('predict', (results: Array<HandposePrediction>) => {
       this.predictions = results;
-      const palmPosition = this.predictions[0]?.annotations?.palmBase[0][1];
+      this.tracking = true;
+      const palmPosition: number = this.predictions[0]?.annotations?.palmBase[0][1];
 
       if (palmPosition !== undefined) {
-        palmPosition < this._WINDOW_CENTER ? this._scrollTo(-100) : this._scrollTo(100);
+        if (palmPosition < this._WINDOW_CENTER) {
+          TrackingComponent._scrollTo(-100);
+          this.handPosition = HandPosition.TOP;
+        } else {
+          TrackingComponent._scrollTo(100);
+          this.handPosition = HandPosition.BOTTOM;
+        }
+      } else {
+        this.handPosition = HandPosition.NONE;
       }
     });
   }
